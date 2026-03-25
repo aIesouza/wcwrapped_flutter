@@ -32,9 +32,10 @@ flutter:
     - assets/images/shared/
 
   fonts:
-    - family: InterBold
+    - family: Inter
       fonts:
         - asset: assets/fonts/Inter-Bold.ttf
-    - family: DrukBold
+
+    - family: Druk
       fonts:
         - asset: assets/fonts/DrukLCG-Bold.ttf
