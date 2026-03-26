@@ -25,6 +25,36 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   static const double sharedPageTitleGap = 28;
   static const double sharedPageContentGap = 28;
 
+  // COVER PAGE — INDEPENDENT TEXT BLOCK CONTROLS
+  static const double coverIntroOffsetY = -8;
+  static const double coverRoundLabelOffsetY = 0;
+  static const double coverSubtextOffsetY = 8;
+
+  static const double coverIntroFontSize = 13;
+  static const double coverRoundLabelFontSize = 13;
+  static const double coverSubtextFontSize = 13;
+
+  static const double coverTextLineHeight = 1.15;
+  static const double coverTextLetterSpacing = 0.0;
+
+  // MIDDLE PAGES — SHARED BOTTOM TEXT CONTROLS
+  static const double middleBottomTextFontSize = 12;
+  static const double middleBottomTextLineHeight = 1.25;
+  static const double middleBottomTextLetterSpacing = 0.0;
+  static const double middleBottomTextWidthFactor = 0.86;
+  static const double middleBottomTextOffsetY = 0;
+  static const double middleBottomTextBottomGap = 0;
+  static const FontWeight middleBottomTextFontWeight = FontWeight.w700;
+
+  // PAGE 5 — CHARACTER / BADGE CONTROLS
+  static const double xpCharacterWidthFactor = 0.55;
+  static const double xpCharacterOffsetX = 0;
+  static const double xpCharacterOffsetY = 310;
+
+  static const double xpBadgeWidthFactor = 0.25;
+  static const double xpBadgeOffsetX = 0;
+  static const double xpBadgeOffsetY = 490;
+
   int currentPage = 0;
   bool showEntryScreen = enableAppEntry;
 
@@ -189,12 +219,19 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
               SizedBox(height: _identityRowTopGap(constraints)),
               if (page.user != null) _userRow(page.user!),
               const SizedBox(height: 20),
-              Text(
-                page.intro ?? '',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF202020),
+              Transform.translate(
+                offset: const Offset(0, coverIntroOffsetY),
+                child: Text(
+                  page.intro ?? '',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: coverIntroFontSize,
+                    color: Color(0xFF202020),
+                    fontWeight: FontWeight.w700,
+                    height: coverTextLineHeight,
+                    letterSpacing: coverTextLetterSpacing,
+                  ),
                 ),
               ),
               const Spacer(),
@@ -209,15 +246,36 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              Text(
-                page.roundLabel ?? '',
-                style: const TextStyle(color: Color(0xFF202020)),
+              Transform.translate(
+                offset: const Offset(0, coverRoundLabelOffsetY),
+                child: Text(
+                  page.roundLabel ?? '',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: coverRoundLabelFontSize,
+                    color: Color(0xFF202020),
+                    fontWeight: FontWeight.w700,
+                    height: coverTextLineHeight,
+                    letterSpacing: coverTextLetterSpacing,
+                  ),
+                ),
               ),
               const SizedBox(height: 10),
-              Text(
-                page.subtext ?? '',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF202020)),
+              Transform.translate(
+                offset: const Offset(0, coverSubtextOffsetY),
+                child: Text(
+                  page.subtext ?? '',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: coverSubtextFontSize,
+                    color: Color(0xFF202020),
+                    fontWeight: FontWeight.w700,
+                    height: coverTextLineHeight,
+                    letterSpacing: coverTextLetterSpacing,
+                  ),
+                ),
               ),
               const Spacer(),
               if (page.footerLogo != null)
@@ -264,14 +322,10 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
               ),
             ],
             const Spacer(),
-            Text(
+            _sharedMiddleBottomText(
               page.players ?? '',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF202020),
-                fontWeight: FontWeight.w600,
-              ),
+              constraints,
+              color: const Color(0xFF202020),
             ),
           ],
         );
@@ -314,14 +368,10 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
               ],
             ),
             const Spacer(),
-            Text(
+            _sharedMiddleBottomText(
               page.players ?? '',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
+              constraints,
+              color: const Color(0xFF202020),
             ),
           ],
         );
@@ -389,29 +439,46 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isSmall = constraints.maxHeight < 700;
-        final characterWidth =
-            isSmall ? constraints.maxWidth * 0.45 : constraints.maxWidth * 0.55;
-        final badgeWidth =
-            isSmall ? constraints.maxWidth * 0.18 : constraints.maxWidth * 0.25;
+
+        final characterWidth = isSmall
+            ? constraints.maxWidth * (xpCharacterWidthFactor - 0.10)
+            : constraints.maxWidth * xpCharacterWidthFactor;
+
+        final badgeWidth = isSmall
+            ? constraints.maxWidth * (xpBadgeWidthFactor - 0.07)
+            : constraints.maxWidth * xpBadgeWidthFactor;
+
+        final characterOffsetY =
+            isSmall ? xpCharacterOffsetY - 10 : xpCharacterOffsetY;
+
+        final badgeOffsetY = isSmall ? xpBadgeOffsetY - 10 : xpBadgeOffsetY;
 
         return Stack(
           children: [
-            Positioned(
-              left: constraints.maxWidth * 0.08,
-              top: constraints.maxHeight * 0.32,
-              width: characterWidth,
-              child: StoryHelpers.safeAsset(
-                page.characterImage ?? '',
-                fit: BoxFit.contain,
+            Align(
+              alignment: Alignment.topCenter,
+              child: Transform.translate(
+                offset: Offset(xpCharacterOffsetX, characterOffsetY),
+                child: SizedBox(
+                  width: characterWidth,
+                  child: StoryHelpers.safeAsset(
+                    page.characterImage ?? '',
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
-            Positioned(
-              left: constraints.maxWidth * 0.28,
-              top: constraints.maxHeight * 0.54,
-              width: badgeWidth,
-              child: StoryHelpers.safeAsset(
-                page.badgeImage ?? '',
-                fit: BoxFit.contain,
+            Align(
+              alignment: Alignment.topCenter,
+              child: Transform.translate(
+                offset: Offset(xpBadgeOffsetX, badgeOffsetY),
+                child: SizedBox(
+                  width: badgeWidth,
+                  child: StoryHelpers.safeAsset(
+                    page.badgeImage ?? '',
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
             _buildStandardPage(
@@ -420,14 +487,10 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
               useUserRow: true,
               content: [
                 const Spacer(),
-                Text(
+                _sharedMiddleBottomText(
                   page.bottomText ?? '',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: isSmall ? 12 : 13,
-                    color: const Color(0xFF202020),
-                    fontWeight: FontWeight.w600,
-                  ),
+                  constraints,
+                  color: const Color(0xFF202020),
                 ),
               ],
             ),
@@ -682,6 +745,38 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _sharedMiddleBottomText(
+    String text,
+    BoxConstraints constraints, {
+    Color color = const Color(0xFF202020),
+  }) {
+    if (text.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: middleBottomTextBottomGap),
+      child: Transform.translate(
+        offset: const Offset(0, middleBottomTextOffsetY),
+        child: SizedBox(
+          width: constraints.maxWidth * middleBottomTextWidthFactor,
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: 'Inter',
+              fontSize: middleBottomTextFontSize,
+              color: Color(0xFF202020),
+              fontWeight: middleBottomTextFontWeight,
+              height: middleBottomTextLineHeight,
+              letterSpacing: middleBottomTextLetterSpacing,
+            ).copyWith(color: color),
+          ),
+        ),
+      ),
     );
   }
 

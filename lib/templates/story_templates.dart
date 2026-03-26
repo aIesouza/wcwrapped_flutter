@@ -93,8 +93,8 @@ class StoryTemplates {
               clipBehavior: Clip.none,
               children: [
                 Positioned(
-                  left: 0,
-                  bottom: -constraints.maxHeight * 0.04,
+                  left: 45,
+                  bottom: -constraints.maxHeight * 0.025,
                   width: constraints.maxWidth * 0.9,
                   child: StoryHelpers.safeAsset(
                     page.spikesImage ?? '',

@@ -37,7 +37,7 @@ const storyPages = [
     id: 'page-3',
     theme: StoryTheme.defaultPage,
     icon: 'assets/images/shared/1F_icon.png',
-    backgroundColor: Color(0xFF111111),
+    backgroundColor: Color(0xFF3385E3),
     backgroundImage: 'assets/images/shared/cards_star_bg.png',
     country: 'ENGLAND',
     flag: 'assets/images/shared/england-circle-flag.png',
