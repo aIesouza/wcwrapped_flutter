@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../data/story_pages.dart';
@@ -46,6 +47,19 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   static const double middleBottomTextBottomGap = 0;
   static const FontWeight middleBottomTextFontWeight = FontWeight.w700;
 
+  // PAGE 4 — PLAYER CONTROLS
+  static const double mvpPlayerWidthFactorSmall = 1.08;
+  static const double mvpPlayerWidthFactor = 1.18;
+  static const double mvpPlayerLeftFactorSmall = -0.05;
+  static const double mvpPlayerLeftFactor = -0.08;
+  static const double mvpPlayerBottomFactorSmall = -0.14;
+  static const double mvpPlayerBottomFactor = -0.16;
+
+  // PAGE 4 — SPIKES CONTROLS
+  static const double mvpSpikesLeftFactor = 0.02;
+  static const double mvpSpikesBottomFactor = -0.16;
+  static const double mvpSpikesWidthFactor = 1.10;
+
   // PAGE 5 — CHARACTER / BADGE CONTROLS
   static const double xpCharacterWidthFactor = 0.55;
   static const double xpCharacterOffsetX = 0;
@@ -54,6 +68,36 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   static const double xpBadgeWidthFactor = 0.25;
   static const double xpBadgeOffsetX = 0;
   static const double xpBadgeOffsetY = 490;
+
+  // PAGE 6 — BADGES GRID CONTROLS
+  static const double badgesGridTopGap = 18;
+  static const double badgesGridHorizontalPadding = 18;
+  static const double badgesGridSpacing = 22;
+  static const double badgesGridRunSpacing = 26;
+  static const double badgesGridBottomPadding = 28;
+
+  static const double badgesCardMaxWidth = 150;
+  static const double badgesCardMinWidth = 118;
+  static const double badgesImageWidthFactor = 0.82;
+  static const double badgesImageBottomGap = 12;
+
+  static const double badgesTextFontSize = 11;
+  static const double badgesTextLineHeight = 1.15;
+  static const double badgesTextLetterSpacing = 0.0;
+  static const FontWeight badgesTextFontWeight = FontWeight.w700;
+
+  // PAGE 7 — METRIC SIZE CONTROLS
+  static const double predictionMainValueSize = 180;
+  static const double predictionSuffixSize = 48;
+  static const double predictionSuffixTopPadding = 38;
+
+  // PAGE 7 — STATS CONTROLS
+  static const double predictionStatValueSize = 78;
+  static const double predictionStatLabelSize = 11;
+  static const double predictionStatSpacing = 6;
+  static const double predictionStatsTopGap = 28;
+  static const double predictionStatsBaselineHeight = 82;
+  static const double predictionStatsRowWidthFactor = 0.68;
 
   int currentPage = 0;
   bool showEntryScreen = enableAppEntry;
@@ -207,8 +251,6 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   }
 
   // PAGE 1
-  // intentionally custom
-
   Widget _roundRecapPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -291,7 +333,6 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   }
 
   // PAGE 2
-
   Widget _defaultPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -334,7 +375,6 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   }
 
   // PAGE 3
-
   Widget _cardsFrenzyPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -380,18 +420,26 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   }
 
   // PAGE 4
-
   Widget _roundMvpPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isSmall = constraints.maxHeight < 700;
 
-        final playerWidth =
-            isSmall ? constraints.maxWidth * 1.08 : constraints.maxWidth * 1.18;
-        final playerLeft =
-            isSmall ? -constraints.maxWidth * 0.05 : -constraints.maxWidth * 0.08;
-        final playerBottom =
-            isSmall ? -constraints.maxHeight * 0.02 : -constraints.maxHeight * 0.04;
+        final playerWidth = isSmall
+            ? constraints.maxWidth * mvpPlayerWidthFactorSmall
+            : constraints.maxWidth * mvpPlayerWidthFactor;
+
+        final playerLeft = isSmall
+            ? constraints.maxWidth * mvpPlayerLeftFactorSmall
+            : constraints.maxWidth * mvpPlayerLeftFactor;
+
+        final playerBottom = isSmall
+            ? constraints.maxHeight * mvpPlayerBottomFactorSmall
+            : constraints.maxHeight * mvpPlayerBottomFactor;
+
+        final spikesLeft = constraints.maxWidth * mvpSpikesLeftFactor;
+        final spikesBottom = constraints.maxHeight * mvpSpikesBottomFactor;
+        final spikesWidth = constraints.maxWidth * mvpSpikesWidthFactor;
 
         return Stack(
           clipBehavior: Clip.none,
@@ -403,6 +451,15 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
               child: StoryHelpers.safeAsset(
                 page.playerImage ?? '',
                 fit: BoxFit.cover,
+              ),
+            ),
+            Positioned(
+              left: spikesLeft,
+              bottom: spikesBottom,
+              width: spikesWidth,
+              child: StoryHelpers.safeAsset(
+                page.bottomSpikes ?? '',
+                fit: BoxFit.contain,
               ),
             ),
             _buildStandardPage(
@@ -434,7 +491,6 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   }
 
   // PAGE 5
-
   Widget _xpRoundPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -501,49 +557,51 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   }
 
   // PAGE 6
-
   Widget _badgesEarnedPage(StoryPageData page) {
+    final badges = page.badges ?? const <BadgeItemData>[];
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isSmall = constraints.maxHeight < 700;
-        final badgeTop = isSmall ? 24.0 : 30.0;
-        final bottomBadgeTop = isSmall ? 180.0 : 200.0;
-
         return _buildStandardPage(
           constraints: constraints,
           page: page,
           useUserRow: true,
           content: [
-            SizedBox(height: _sharedPageContentGapValue(constraints) + 8),
+            SizedBox(height: badgesGridTopGap),
             Expanded(
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  _badgePositioned(
-                    left: constraints.maxWidth * 0.05,
-                    top: badgeTop,
-                    width: constraints.maxWidth * 0.30,
-                    image: page.badgeLeftImage ?? '',
-                    title: page.badgeLeftTitle ?? '',
-                    text: page.badgeLeftText ?? '',
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: badgesGridBottomPadding),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: badgesGridHorizontalPadding,
                   ),
-                  _badgePositioned(
-                    left: constraints.maxWidth * 0.65,
-                    top: badgeTop,
-                    width: constraints.maxWidth * 0.30,
-                    image: page.badgeRightImage ?? '',
-                    title: page.badgeRightTitle ?? '',
-                    text: page.badgeRightText ?? '',
+                  child: LayoutBuilder(
+                    builder: (context, gridConstraints) {
+                      final availableWidth = gridConstraints.maxWidth;
+                      final rawCardWidth =
+                          (availableWidth - badgesGridSpacing) / 2;
+                      final badgeCardWidth = math.max(
+                        badgesCardMinWidth,
+                        math.min(badgesCardMaxWidth, rawCardWidth),
+                      );
+
+                      return Wrap(
+                        alignment: WrapAlignment.center,
+                        runAlignment: WrapAlignment.start,
+                        spacing: badgesGridSpacing,
+                        runSpacing: badgesGridRunSpacing,
+                        children: badges
+                            .map(
+                              (badge) => _badgeGridCard(
+                                width: badgeCardWidth,
+                                badge: badge,
+                              ),
+                            )
+                            .toList(),
+                      );
+                    },
                   ),
-                  _badgePositioned(
-                    left: constraints.maxWidth * 0.30,
-                    top: bottomBadgeTop,
-                    width: constraints.maxWidth * 0.40,
-                    image: page.badgeBottomImage ?? '',
-                    title: page.badgeBottomTitle ?? '',
-                    text: page.badgeBottomText ?? '',
-                  ),
-                ],
+                ),
               ),
             ),
           ],
@@ -552,33 +610,33 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
     );
   }
 
-  Widget _badgePositioned({
-    required double left,
-    required double top,
+  Widget _badgeGridCard({
     required double width,
-    required String image,
-    required String title,
-    required String text,
+    required BadgeItemData badge,
   }) {
-    return Positioned(
-      left: left,
-      top: top,
+    return SizedBox(
       width: width,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          StoryHelpers.safeAsset(
-            image,
-            fit: BoxFit.contain,
+          SizedBox(
+            width: width * badgesImageWidthFactor,
+            child: StoryHelpers.safeAsset(
+              badge.image,
+              fit: BoxFit.contain,
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: badgesImageBottomGap),
           Text(
-            '$title\n$text',
+            '${badge.title}\n${badge.text}',
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 11,
+              fontFamily: 'Inter',
+              fontSize: badgesTextFontSize,
               color: Color(0xFF202020),
-              fontWeight: FontWeight.w600,
-              height: 1.2,
+              fontWeight: badgesTextFontWeight,
+              height: badgesTextLineHeight,
+              letterSpacing: badgesTextLetterSpacing,
             ),
           ),
         ],
@@ -587,14 +645,33 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   }
 
   // PAGE 7
-
   Widget _predictionStatusPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isSmall = constraints.maxHeight < 700;
-        final mainValueSize = isSmall ? 104.0 : 120.0;
-        final suffixSize = isSmall ? 30.0 : 36.0;
-        final statValueSize = isSmall ? 40.0 : 46.0;
+
+        final mainValueSize =
+            isSmall ? predictionMainValueSize - 16 : predictionMainValueSize;
+
+        final suffixSize =
+            isSmall ? predictionSuffixSize - 8 : predictionSuffixSize;
+
+        final suffixTopPadding = isSmall
+            ? predictionSuffixTopPadding - 2
+            : predictionSuffixTopPadding;
+
+        final statValueSize =
+            isSmall ? predictionStatValueSize - 6 : predictionStatValueSize;
+
+        final statLabelSize =
+            isSmall ? predictionStatLabelSize - 1 : predictionStatLabelSize;
+
+        final statsTopGap =
+            isSmall ? predictionStatsTopGap - 8 : predictionStatsTopGap;
+
+        final statsBaselineHeight = isSmall
+            ? predictionStatsBaselineHeight - 6
+            : predictionStatsBaselineHeight;
 
         return _buildStandardPage(
           constraints: constraints,
@@ -605,6 +682,7 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
             Text(
               page.metricLabel ?? '',
               style: const TextStyle(
+                fontFamily: 'Inter',
                 color: Color(0xFF202020),
                 fontWeight: FontWeight.w600,
               ),
@@ -624,7 +702,7 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 16),
+                  padding: EdgeInsets.only(top: suffixTopPadding),
                   child: Text(
                     page.mainSuffix ?? '',
                     style: TextStyle(
@@ -636,26 +714,36 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
                 ),
               ],
             ),
-            SizedBox(height: isSmall ? 22 : 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _statBlock(
-                  page.stat1Label ?? '',
-                  page.stat1Value ?? '',
-                  valueSize: statValueSize,
-                ),
-                _statBlock(
-                  page.stat2Label ?? '',
-                  page.stat2Value ?? '',
-                  valueSize: statValueSize,
-                ),
-                _statBlock(
-                  page.stat3Label ?? '',
-                  page.stat3Value ?? '',
-                  valueSize: statValueSize,
-                ),
-              ],
+            SizedBox(height: statsTopGap),
+            SizedBox(
+              width: constraints.maxWidth * predictionStatsRowWidthFactor,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _statBlock(
+                    page.stat1Label ?? '',
+                    page.stat1Value ?? '',
+                    valueSize: statValueSize,
+                    labelSize: statLabelSize,
+                    baselineHeight: statsBaselineHeight,
+                  ),
+                  _statBlock(
+                    page.stat2Label ?? '',
+                    page.stat2Value ?? '',
+                    valueSize: statValueSize,
+                    labelSize: statLabelSize,
+                    baselineHeight: statsBaselineHeight,
+                  ),
+                  _statBlock(
+                    page.stat3Label ?? '',
+                    page.stat3Value ?? '',
+                    valueSize: statValueSize,
+                    labelSize: statLabelSize,
+                    baselineHeight: statsBaselineHeight,
+                  ),
+                ],
+              ),
             ),
           ],
         );
@@ -666,36 +754,47 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   Widget _statBlock(
     String label,
     String value, {
-    double valueSize = 46,
+    required double valueSize,
+    required double labelSize,
+    required double baselineHeight,
   }) {
-    return Column(
-      children: [
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 11,
-            color: Color(0xFF202020),
-            fontWeight: FontWeight.w600,
+    return SizedBox(
+      width: 74,
+      child: Column(
+        children: [
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: labelSize,
+              color: const Color(0xFF202020),
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: TextStyle(
-            fontFamily: 'Druk',
-            fontSize: valueSize,
-            color: const Color(0xFF202020),
-            height: 0.9,
+          SizedBox(height: predictionStatSpacing),
+          SizedBox(
+            height: baselineHeight,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Text(
+                value,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Druk',
+                  fontSize: valueSize,
+                  color: const Color(0xFF202020),
+                  height: 0.9,
+                ),
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   // PAGE 8
-  // intentionally custom
-
   Widget _shareRecapPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {

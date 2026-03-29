@@ -17,6 +17,18 @@ class UserData {
   final String avatar;
 }
 
+class BadgeItemData {
+  const BadgeItemData({
+    required this.image,
+    required this.title,
+    required this.text,
+  });
+
+  final String image;
+  final String title;
+  final String text;
+}
+
 class StoryPageData {
   const StoryPageData({
     required this.id,
@@ -55,6 +67,7 @@ class StoryPageData {
     this.badgeRightText,
     this.badgeBottomTitle,
     this.badgeBottomText,
+    this.badges,
     this.metricLabel,
     this.mainValue,
     this.mainSuffix,
@@ -105,6 +118,10 @@ class StoryPageData {
   final String? badgeRightText;
   final String? badgeBottomTitle;
   final String? badgeBottomText;
+
+  // NEW — dynamic badges support
+  final List<BadgeItemData>? badges;
+
   final String? metricLabel;
   final String? mainValue;
   final String? mainSuffix;

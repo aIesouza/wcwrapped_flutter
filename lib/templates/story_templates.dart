@@ -7,7 +7,6 @@ class StoryTemplates {
     return LayoutBuilder(
       builder: (context, constraints) {
         switch (page.theme) {
-
           // ---------------- PAGE 1 ----------------
           case StoryTheme.roundRecap:
             return Stack(
@@ -72,20 +71,7 @@ class StoryTemplates {
 
           // ---------------- PAGE 4 ----------------
           case StoryTheme.roundMvp:
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned(
-                  left: constraints.maxWidth * 0.02,
-                  bottom: -constraints.maxHeight * 0.05,
-                  width: constraints.maxWidth * 1.1,
-                  child: StoryHelpers.safeAsset(
-                    page.bottomSpikes ?? '',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ],
-            );
+            return const SizedBox.shrink();
 
           // ---------------- PAGE 5 ----------------
           case StoryTheme.xpRound:

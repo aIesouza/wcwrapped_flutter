@@ -86,15 +86,23 @@ const storyPages = [
     ),
     title: 'BADGES\nEARNED',
     spikesImage: 'assets/images/page-6/element-1.png',
-    badgeLeftImage: 'assets/images/page-6/element-2.png',
-    badgeRightImage: 'assets/images/page-6/element-3.png',
-    badgeBottomImage: 'assets/images/page-6/element-4.png',
-    badgeLeftTitle: 'BADGE NAME',
-    badgeLeftText: 'CARDS EARNED BY BUKAYO.',
-    badgeRightTitle: 'BADGE NAME',
-    badgeRightText: 'CARDS EARNED BY BUKAYO.',
-    badgeBottomTitle: 'BADGE NAME',
-    badgeBottomText: 'CARDS EARNED BY BUKAYO.',
+    badges: [
+      BadgeItemData(
+        image: 'assets/images/page-6/element-2.png',
+        title: 'BADGE NAME',
+        text: 'CARDS EARNED BY\nBUKAYO.',
+      ),
+      BadgeItemData(
+        image: 'assets/images/page-6/element-3.png',
+        title: 'BADGE NAME',
+        text: 'CARDS EARNED BY\nBUKAYO.',
+      ),
+      BadgeItemData(
+        image: 'assets/images/page-6/element-4.png',
+        title: 'BADGE NAME',
+        text: 'CARDS EARNED BY\nBUKAYO.',
+      ),
+    ],
   ),
   StoryPageData(
     id: 'page-7',
