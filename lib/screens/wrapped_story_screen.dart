@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../data/story_pages.dart';
 import '../models/story_page_data.dart';
+import '../widgets/echo_trail_asset.dart';
 import '../widgets/progress_bars.dart';
 import '../widgets/story_header.dart';
 import '../widgets/story_helpers.dart';
@@ -25,6 +26,14 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   static const double sharedPageTitleLetterSpacing = -0.2;
   static const double sharedPageTitleGap = 28;
   static const double sharedPageContentGap = 28;
+
+  // SHARED BIG NUMBER CONTROLS
+  static const double mainBigNumberSize = 180;
+
+  // SHARED METRIC LABEL CONTROLS (PAGE 7 + PAGE 8)
+  static const double sharedMetricLabelFontSize = 14;
+  static const double sharedMetricLabelLineHeight = 1.0;
+  static const FontWeight sharedMetricLabelFontWeight = FontWeight.w600;
 
   // COVER PAGE — INDEPENDENT TEXT BLOCK CONTROLS
   static const double coverIntroOffsetY = -8;
@@ -60,6 +69,15 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   static const double mvpSpikesBottomFactor = -0.16;
   static const double mvpSpikesWidthFactor = 1.10;
 
+  // PAGE 4 — RED EFFECT ANGLE
+  static const double mvpSpikesEffectAngle = -20;
+
+  // PAGE 4 — RED EFFECT COLORS
+  static const List<Color> _redEffectColors = [
+    Color(0xFFB92E2E),
+    Color(0xFF7F1E1E),
+  ];
+
   // PAGE 5 — CHARACTER / BADGE CONTROLS
   static const double xpCharacterWidthFactor = 0.55;
   static const double xpCharacterOffsetX = 0;
@@ -87,7 +105,6 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   static const FontWeight badgesTextFontWeight = FontWeight.w700;
 
   // PAGE 7 — METRIC SIZE CONTROLS
-  static const double predictionMainValueSize = 180;
   static const double predictionSuffixSize = 48;
   static const double predictionSuffixTopPadding = 38;
 
@@ -98,6 +115,19 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   static const double predictionStatsTopGap = 28;
   static const double predictionStatsBaselineHeight = 82;
   static const double predictionStatsRowWidthFactor = 0.68;
+
+  // PAGE 8 — APP ACTIVITY CONTROLS
+  static const double activityMetricLabelGap = 8;
+  static const double activityMainValueLineHeight = 0.85;
+
+  static const double activityBottomStatsTopGap = 28;
+  static const double activityBottomStatsRowWidthFactor = 0.78;
+  static const double activityBottomStatsBottomGap = 12;
+  static const double activityBottomStatLabelSize = 11;
+  static const double activityBottomStatLabelLineHeight = 1.05;
+  static const double activityBottomStatValueSize = 84;
+  static const double activityBottomStatSpacing = 6;
+  static const double activityBottomStatsBaselineHeight = 92;
 
   int currentPage = 0;
   bool showEntryScreen = enableAppEntry;
@@ -120,6 +150,20 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
       return;
     }
     Navigator.of(context).maybePop();
+  }
+
+  EchoTrailSpec _redEffectSpec(double angleDegrees) {
+    return EchoTrailSpec(
+      copyCount: 2,
+      colors: _redEffectColors,
+      angleDegrees: angleDegrees,
+      distanceStep: 14,
+      duration: const Duration(milliseconds: 1400),
+      curve: Curves.easeInOut,
+      copyOpacity: 0.45,
+      maxSpread: 1.0,
+      showOriginal: true,
+    );
   }
 
   @override
@@ -245,12 +289,13 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
         return _badgesEarnedPage(page);
       case StoryTheme.predictionStatus:
         return _predictionStatusPage(page);
+      case StoryTheme.appActivity:
+        return _appActivityPage(page);
       case StoryTheme.shareRecap:
         return _shareRecapPage(page);
     }
   }
 
-  // PAGE 1
   Widget _roundRecapPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -332,7 +377,6 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
     );
   }
 
-  // PAGE 2
   Widget _defaultPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -346,7 +390,7 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
               page.score ?? '',
               style: TextStyle(
                 fontFamily: 'Druk',
-                fontSize: _sharedBigNumberSize(constraints),
+                fontSize: _mainBigNumberSize(constraints),
                 color: const Color(0xFF202020),
                 height: 0.85,
               ),
@@ -374,7 +418,6 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
     );
   }
 
-  // PAGE 3
   Widget _cardsFrenzyPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -392,7 +435,7 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
                   page.score ?? '',
                   style: TextStyle(
                     fontFamily: 'Druk',
-                    fontSize: _sharedBigNumberSize(constraints),
+                    fontSize: _mainBigNumberSize(constraints),
                     color: const Color(0xFF202020),
                     height: 0.85,
                   ),
@@ -419,7 +462,6 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
     );
   }
 
-  // PAGE 4
   Widget _roundMvpPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -457,9 +499,10 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
               left: spikesLeft,
               bottom: spikesBottom,
               width: spikesWidth,
-              child: StoryHelpers.safeAsset(
-                page.bottomSpikes ?? '',
+              child: EchoTrailAsset(
+                assetPath: page.bottomSpikes ?? '',
                 fit: BoxFit.contain,
+                spec: _redEffectSpec(mvpSpikesEffectAngle),
               ),
             ),
             _buildStandardPage(
@@ -490,7 +533,6 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
     );
   }
 
-  // PAGE 5
   Widget _xpRoundPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -556,7 +598,6 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
     );
   }
 
-  // PAGE 6
   Widget _badgesEarnedPage(StoryPageData page) {
     final badges = page.badges ?? const <BadgeItemData>[];
 
@@ -644,14 +685,12 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
     );
   }
 
-  // PAGE 7
   Widget _predictionStatusPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isSmall = constraints.maxHeight < 700;
 
-        final mainValueSize =
-            isSmall ? predictionMainValueSize - 16 : predictionMainValueSize;
+        final mainValueSize = _mainBigNumberSize(constraints);
 
         final suffixSize =
             isSmall ? predictionSuffixSize - 8 : predictionSuffixSize;
@@ -683,8 +722,10 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
               page.metricLabel ?? '',
               style: const TextStyle(
                 fontFamily: 'Inter',
+                fontSize: sharedMetricLabelFontSize,
+                height: sharedMetricLabelLineHeight,
                 color: Color(0xFF202020),
-                fontWeight: FontWeight.w600,
+                fontWeight: sharedMetricLabelFontWeight,
               ),
             ),
             const SizedBox(height: 8),
@@ -794,7 +835,131 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
     );
   }
 
-  // PAGE 8
+  Widget _appActivityPage(StoryPageData page) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmall = constraints.maxHeight < 700;
+
+        final metricLabelSize = isSmall
+            ? sharedMetricLabelFontSize - 1
+            : sharedMetricLabelFontSize;
+
+        final mainValueSize = _mainBigNumberSize(constraints);
+
+        final bottomStatValueSize =
+            isSmall ? activityBottomStatValueSize - 8 : activityBottomStatValueSize;
+
+        final bottomBaselineHeight = isSmall
+            ? activityBottomStatsBaselineHeight - 8
+            : activityBottomStatsBaselineHeight;
+
+        final bottomStatsTopGap = isSmall
+            ? activityBottomStatsTopGap - 6
+            : activityBottomStatsTopGap;
+
+        return _buildStandardPage(
+          constraints: constraints,
+          page: page,
+          useUserRow: true,
+          content: [
+            SizedBox(height: _sharedPageContentGapValue(constraints)),
+            Text(
+              page.metricLabel ?? '',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: metricLabelSize,
+                color: const Color(0xFF202020),
+                fontWeight: sharedMetricLabelFontWeight,
+                height: sharedMetricLabelLineHeight,
+              ),
+            ),
+            SizedBox(height: activityMetricLabelGap),
+            Text(
+              page.mainValue ?? '',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Druk',
+                fontSize: mainValueSize,
+                color: const Color(0xFF202020),
+                height: activityMainValueLineHeight,
+              ),
+            ),
+            SizedBox(height: bottomStatsTopGap),
+            SizedBox(
+              width: constraints.maxWidth * activityBottomStatsRowWidthFactor,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _activityStatBlock(
+                    label: page.stat1Label ?? '',
+                    value: page.stat1Value ?? '',
+                    labelSize: activityBottomStatLabelSize,
+                    valueSize: bottomStatValueSize,
+                    baselineHeight: bottomBaselineHeight,
+                  ),
+                  _activityStatBlock(
+                    label: page.stat2Label ?? '',
+                    value: page.stat2Value ?? '',
+                    labelSize: activityBottomStatLabelSize,
+                    valueSize: bottomStatValueSize,
+                    baselineHeight: bottomBaselineHeight,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: activityBottomStatsBottomGap),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _activityStatBlock({
+    required String label,
+    required String value,
+    required double labelSize,
+    required double valueSize,
+    required double baselineHeight,
+  }) {
+    return SizedBox(
+      width: 118,
+      child: Column(
+        children: [
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: labelSize,
+              color: const Color(0xFF202020),
+              fontWeight: FontWeight.w700,
+              height: activityBottomStatLabelLineHeight,
+            ),
+          ),
+          SizedBox(height: activityBottomStatSpacing),
+          SizedBox(
+            height: baselineHeight,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Text(
+                value,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Druk',
+                  fontSize: valueSize,
+                  color: const Color(0xFF202020),
+                  height: 0.9,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _shareRecapPage(StoryPageData page) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -955,9 +1120,9 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
     return isSmall ? sharedPageContentGap - 4 : sharedPageContentGap;
   }
 
-  double _sharedBigNumberSize(BoxConstraints constraints) {
+  double _mainBigNumberSize(BoxConstraints constraints) {
     final isSmall = constraints.maxHeight < 700;
-    return isSmall ? 104 : 120;
+    return isSmall ? mainBigNumberSize - 20 : mainBigNumberSize;
   }
 
   Widget _sharedPageTitle(String text, BoxConstraints constraints) {

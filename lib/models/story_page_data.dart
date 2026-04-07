@@ -7,6 +7,7 @@ enum StoryTheme {
   xpRound,
   badgesEarned,
   predictionStatus,
+  appActivity,
   shareRecap,
 }
 
@@ -118,10 +119,7 @@ class StoryPageData {
   final String? badgeRightText;
   final String? badgeBottomTitle;
   final String? badgeBottomText;
-
-  // NEW — dynamic badges support
   final List<BadgeItemData>? badges;
-
   final String? metricLabel;
   final String? mainValue;
   final String? mainSuffix;
