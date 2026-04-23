@@ -1,13 +1,18 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../data/story_pages.dart';
+import '../helpers/share_card_helper.dart';
+import '../models/share_recap_data.dart';
 import '../models/story_page_data.dart';
+import '../templates/story_templates.dart';
 import '../widgets/echo_trail_asset.dart';
+import '../widgets/interactive_tilt_card.dart';
 import '../widgets/progress_bars.dart';
+import '../widgets/share_recap_card.dart';
 import '../widgets/story_header.dart';
 import '../widgets/story_helpers.dart';
-import '../templates/story_templates.dart';
 
 class WrappedStoryScreen extends StatefulWidget {
   const WrappedStoryScreen({super.key});
@@ -69,14 +74,28 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   static const double mvpSpikesBottomFactor = -0.16;
   static const double mvpSpikesWidthFactor = 1.10;
 
-  // PAGE 4 — RED EFFECT ANGLE
+  // PAGE 4 — LEGACY ECHO TRAIL ANGLE
   static const double mvpSpikesEffectAngle = -20;
 
-  // PAGE 4 — RED EFFECT COLORS
   static const List<Color> _redEffectColors = [
     Color(0xFFB92E2E),
     Color(0xFF7F1E1E),
   ];
+
+  static const EchoAnimationStyle mvpAnimationStyle =
+      EchoAnimationStyle.anchoredExpand;
+
+  static const Duration mvpExpandDuration = Duration(milliseconds: 1600);
+  static const Curve mvpExpandCurve = Curves.easeInOut;
+  static const double mvpExpandMinScale = 1.0;
+  static const double mvpExpandMaxScale = 1.08;
+  static const Alignment mvpExpandAlignment = Alignment.bottomCenter;
+
+  static const int mvpEchoCopyCount = 2;
+  static const double mvpEchoDistanceStep = 14;
+  static const double mvpEchoCopyOpacity = 0.45;
+  static const double mvpEchoMaxSpread = 1.0;
+  static const bool mvpEchoShowOriginal = true;
 
   // PAGE 5 — CHARACTER / BADGE CONTROLS
   static const double xpCharacterWidthFactor = 0.55;
@@ -129,8 +148,11 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   static const double activityBottomStatSpacing = 6;
   static const double activityBottomStatsBaselineHeight = 92;
 
+  final GlobalKey _shareCardBoundaryKey = GlobalKey();
+
   int currentPage = 0;
   bool showEntryScreen = enableAppEntry;
+  bool _isSharing = false;
 
   void goNext() {
     if (currentPage < storyPages.length - 1) {
@@ -154,16 +176,69 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
 
   EchoTrailSpec _redEffectSpec(double angleDegrees) {
     return EchoTrailSpec(
-      copyCount: 2,
+      style: mvpAnimationStyle,
+      duration: mvpExpandDuration,
+      curve: mvpExpandCurve,
+      copyCount: mvpEchoCopyCount,
       colors: _redEffectColors,
       angleDegrees: angleDegrees,
-      distanceStep: 14,
-      duration: const Duration(milliseconds: 1400),
-      curve: Curves.easeInOut,
-      copyOpacity: 0.45,
-      maxSpread: 1.0,
-      showOriginal: true,
+      distanceStep: mvpEchoDistanceStep,
+      copyOpacity: mvpEchoCopyOpacity,
+      maxSpread: mvpEchoMaxSpread,
+      showOriginal: mvpEchoShowOriginal,
+      minScale: mvpExpandMinScale,
+      maxScale: mvpExpandMaxScale,
+      scaleAlignment: mvpExpandAlignment,
     );
+  }
+
+  ShareRecapData _buildShareRecapData() {
+    // Placeholder for now.
+    // Later this should be assembled from the real page/story data.
+    final sharePage = storyPages.firstWhere((p) => p.id == 'page-9');
+
+    return ShareRecapData(
+      userName: '@LW09_SCORER',
+      avatarPath: 'assets/images/page-1/profile.png',
+      flagPath: 'assets/images/shared/england-circle-flag.png',
+      countryName: 'ENGLAND',
+      headline: "I'M A TOP TIER\nTACTICIAN",
+      predictionAccuracy: '68%',
+      sessions: '72',
+      readingTime: '120 M',
+      weekLabel: 'WEEK 1 RECAP',
+      tier: sharePage.shareCardTier,
+      baseImagePath: sharePage.shareCardBaseImage,
+    );
+  }
+
+  Future<void> _shareRecapCard() async {
+    if (_isSharing) return;
+
+    final context = _shareCardBoundaryKey.currentContext;
+    if (context == null) return;
+
+    final boundary = context.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) return;
+
+    try {
+      setState(() => _isSharing = true);
+
+      await ShareCardHelper.shareBoundaryImage(
+        boundary,
+        fileName: 'wrapped_recap_card.png',
+        text: 'My Wrapped Recap',
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not share the recap card.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSharing = false);
+      }
+    }
   }
 
   @override
@@ -212,20 +287,22 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
 
   Widget _buildStoryScreen() {
     final page = storyPages[currentPage];
+    final isSharePage = page.theme == StoryTheme.shareRecap;
 
     return Stack(
       children: [
         Positioned.fill(child: _buildPageBackground(page)),
         Positioned.fill(child: StoryTemplates.buildDecor(page)),
         Positioned.fill(child: _buildPageContent(page)),
-        Positioned.fill(
-          child: Row(
-            children: [
-              Expanded(child: GestureDetector(onTap: goPrevious)),
-              Expanded(child: GestureDetector(onTap: goNext)),
-            ],
+        if (!isSharePage)
+          Positioned.fill(
+            child: Row(
+              children: [
+                Expanded(child: GestureDetector(onTap: goPrevious)),
+                Expanded(child: GestureDetector(onTap: goNext)),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
@@ -961,56 +1038,105 @@ class _WrappedStoryScreenState extends State<WrappedStoryScreen> {
   }
 
   Widget _shareRecapPage(StoryPageData page) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isSmall = constraints.maxHeight < 700;
-        final cardWidth =
-            isSmall ? constraints.maxWidth * 0.58 : constraints.maxWidth * 0.66;
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final isSmall = constraints.maxHeight < 700;
+      final recapData = _buildShareRecapData();
 
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(8, 10, 8, 16),
-          child: Column(
-            children: [
-              Text(
+      final cardWidth = isSmall
+          ? constraints.maxWidth * 0.72
+          : constraints.maxWidth * 0.76;
+
+      // COPY POSITION CONTROLS
+      final introTopGap = isSmall ? 72.0 : 86.0;
+      final introBottomGap = isSmall ? 12.0 : 18.0;
+
+      // COPY STYLE CONTROLS
+      final introWidthFactor = 0.74;
+      final introFontSize = isSmall ? 13.0 : 14.0;
+      final introLineHeight = 1.05;
+      final introLetterSpacing = -0.1;
+
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(8, 10, 8, 16),
+        child: Column(
+          children: [
+            SizedBox(height: introTopGap),
+            SizedBox(
+              width: constraints.maxWidth * introWidthFactor,
+              child: Text(
                 page.intro ?? '',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF202020),
-                  fontWeight: FontWeight.w600,
-                ),
+                maxLines: 2,
+                overflow: TextOverflow.visible,
+                style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: introFontSize,
+                color: const Color(0xFF202020),
+                fontWeight: FontWeight.w700,
+                height: 0.95,
+                letterSpacing: -0.2,
               ),
-              SizedBox(height: isSmall ? 14 : 20),
-              Expanded(
-                child: Center(
-                  child: SizedBox(
-                    width: cardWidth,
-                    child: StoryHelpers.safeAsset(
-                      page.cardImage ?? '',
-                      fit: BoxFit.contain,
+              ),
+            ),
+            SizedBox(height: introBottomGap),
+            Expanded(
+              child: Stack(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: goPrevious,
+                        ),
+                      ),
+                      SizedBox(width: cardWidth),
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: goNext,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Center(
+                    child: SizedBox(
+                      width: cardWidth,
+                      child: InteractiveTiltCard(
+                        child: RepaintBoundary(
+                          key: _shareCardBoundaryKey,
+                          child: ShareRecapCard(data: recapData),
+                        ),
+                      ),
                     ),
                   ),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: constraints.maxWidth * 0.78,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF272727),
+                  foregroundColor: const Color(0xFFF4F4F4),
+                  minimumSize: Size.fromHeight(isSmall ? 42 : 44),
+                  shape: const StadiumBorder(),
+                ),
+                onPressed: _isSharing ? null : _shareRecapCard,
+                child: Text(
+                  _isSharing
+                      ? 'PREPARING...'
+                      : (page.buttonLabel ?? 'SHARE'),
                 ),
               ),
-              SizedBox(
-                width: constraints.maxWidth * 0.78,
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF272727),
-                    foregroundColor: const Color(0xFFF4F4F4),
-                    minimumSize: Size.fromHeight(isSmall ? 42 : 44),
-                    shape: const StadiumBorder(),
-                  ),
-                  onPressed: () {},
-                  child: Text(page.buttonLabel ?? 'SHARE'),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
   Widget _sharedMiddleBottomText(
     String text,

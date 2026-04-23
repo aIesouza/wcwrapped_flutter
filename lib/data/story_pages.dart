@@ -38,9 +38,9 @@ const storyPages = [
     theme: StoryTheme.defaultPage,
     icon: 'assets/images/shared/1F_icon.png',
     backgroundColor: Color(0xFF3385E3),
-    backgroundImage: 'assets/images/shared/cards_star_bg.png',
     country: 'ENGLAND',
     flag: 'assets/images/shared/england-circle-flag.png',
+    decorImage: 'assets/images/page-3/element-1.png',
     title: 'CARDS\nFRENZY',
     score: '7',
     yellow: '7',
@@ -150,7 +150,11 @@ const storyPages = [
     backgroundColor: Color(0xFFD4D4D4),
     intro: 'ANOTHER ROUND WRAPPED,\nAND YOU LEFT YOUR MARK',
     backgroundDecor: 'assets/images/page-8/element-1.png',
-    cardImage: 'assets/images/page-8/element-2.png',
     buttonLabel: 'SHARE THE RECAP',
+    shareCardTier: ShareCardTier.regular,
+
+    // future tier base
+    // replace with your real PNG base whenever ready
+    shareCardBaseImage: null,
   ),
 ];

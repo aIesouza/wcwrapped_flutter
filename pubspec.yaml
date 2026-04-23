@@ -10,6 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  share_plus: ^10.0.2
+  path_provider: ^2.1.4
 
 dev_dependencies:
   flutter_test:
@@ -24,6 +26,7 @@ flutter:
     - assets/images/entry-screen/
     - assets/images/page-1/
     - assets/images/page-2/
+    - assets/images/page-3/
     - assets/images/page-4/
     - assets/images/page-5/
     - assets/images/page-6/

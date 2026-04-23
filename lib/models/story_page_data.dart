@@ -11,6 +11,12 @@ enum StoryTheme {
   shareRecap,
 }
 
+enum ShareCardTier {
+  regular,
+  gold,
+  legend,
+}
+
 class UserData {
   const UserData({required this.name, required this.avatar});
 
@@ -81,6 +87,10 @@ class StoryPageData {
     this.backgroundDecor,
     this.cardImage,
     this.buttonLabel,
+
+    // future-ready share card fields
+    this.shareCardTier = ShareCardTier.regular,
+    this.shareCardBaseImage,
   });
 
   final String id;
@@ -132,4 +142,8 @@ class StoryPageData {
   final String? backgroundDecor;
   final String? cardImage;
   final String? buttonLabel;
+
+  // future-ready share card fields
+  final ShareCardTier shareCardTier;
+  final String? shareCardBaseImage;
 }
